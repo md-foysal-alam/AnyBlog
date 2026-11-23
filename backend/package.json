@@ -1,11 +1,28 @@
 {
   "devDependencies": {
+    "nodemon": "^3.1.14",
     "tsx": "^4.23.15"
   },
   "scripts": {
-    "start": "tsx ./script.ts"
+    "dev": "nodemon --exc tsx server.ts",
+    "build": "tsc",
+    "start": "node server.ts"
   },
+  "author": "module",
   "dependencies": {
-    "express": "^5.3.0"
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/pg": "^8.23.1",
+    "compression": "^1.8.2",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
+    "env": "^0.0.2",
+    "express": "^5.3.0",
+    "morgan": "^1.12.1",
+    "pg": "^8.23.1"
   }
 }
