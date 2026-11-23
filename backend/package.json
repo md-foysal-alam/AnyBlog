@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  },
+  "scripts": {
+    "start": "tsx ./script.ts"
+  },
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
