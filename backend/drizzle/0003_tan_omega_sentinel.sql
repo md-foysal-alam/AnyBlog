@@ -1,0 +1,1 @@
+ALTER TABLE "likes" ADD COLUMN "content" text NOT NULL;
