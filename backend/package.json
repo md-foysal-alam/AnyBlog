@@ -1,14 +1,16 @@
 {
+  "name": "anyblog-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --exec tsx server.ts",
+    "build": "tsc",
+    "start": "node server.ts"
+  },
   "devDependencies": {
     "nodemon": "^3.1.14",
     "tsx": "^4.23.15"
   },
-  "scripts": {
-    "dev": "nodemon --exc tsx server.ts",
-    "build": "tsc",
-    "start": "node server.ts"
-  },
-  "author": "module",
   "dependencies": {
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
@@ -21,7 +23,6 @@
     "dotenv": "^18.0.10",
     "drizzle-kit": "^0.31.11",
     "drizzle-orm": "^0.45.4",
-    "env": "^0.0.2",
     "express": "^5.3.0",
     "morgan": "^1.12.1",
     "pg": "^8.23.1"
