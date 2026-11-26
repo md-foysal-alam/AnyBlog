@@ -13,9 +13,23 @@
 // limitations under the License.
 
 
-import express  from "express";
-const router = express.Router();
+// src/routes/auth.routes.ts
+import { Router } from "express";
 
-// router.get("");
+import Signup from "../controllers/auth/signup/signup.ts";
+import Login from "../controllers/auth/signin/signin.ts";
+import Logout from "../controllers/auth/logout/logout.ts";
+import verifySession from "../controllers/auth/verifySession/verifySession.ts";
+
+const router = Router();
+
+router.post("/signup", Signup.Signup);
+router.post("/signin", Login.Login);
+router.post("/logout", Logout.Logout);
+
+// example protected route
+router.get("/me", verifySession, (req, res) => {
+  res.status(200).json({ success: true, data: (req as any).account });
+});
 
 export default router;

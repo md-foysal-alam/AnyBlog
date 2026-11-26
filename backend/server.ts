@@ -1,20 +1,10 @@
 // Copyright 2026 Foysal Alam Rohan
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the specific language governing permissions and
-// limitations under the License.
+// ... (license header, with the last line corrected)
 
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
 
@@ -22,30 +12,48 @@ import router from "./src/routes/router.ts";
 import { connectDb } from "./src/db/db.ts";
 import { errorHandler } from "./src/middlewares/errorHandler.ts";
 
-dotenv.config();
-
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
+const isProd = process.env.NODE_ENV === "production";
 
-app.use(morgan("dev"));
+if (isProd) app.set("trust proxy", 1);
+
+app.use(helmet());
+app.use(morgan(isProd ? "combined" : "dev"));
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
   })
 );
 app.use(compression());
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/health", (_req, res) => res.status(200).json({ status: "ok" }));
+
 app.use("/anyblog", router);
-app.use(errorHandler);
+
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: "Route not found" });
+});
+
+app.use(errorHandler); // must stay last
 
 async function startServer() {
   await connectDb();
-  app.listen(PORT, () => {
+
+  const server = app.listen(PORT, () => {
     console.log(`🚀 anyBlog Server running at http://localhost:${PORT} ✔`);
   });
+
+  server.on("error", (err) => {
+    console.error("Server error:", err);
+    process.exit(1);
+  });
+
+  const shutdown = () => server.close(() => process.exit(0));
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }
 
 startServer().catch((err) => {

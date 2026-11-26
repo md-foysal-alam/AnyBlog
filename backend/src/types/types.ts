@@ -13,25 +13,17 @@
 // limitations under the License.
 
 
-export interface signUpTypes {
-    first_name:     string | null,
-    last_name:      string | null,
-    email:          string | null,
-    password_hash:  string | null,
-    avatar_url:     string | null,
-    bio:            string | null,
+export interface SignupInput {
+  email       : string;
+  username    : string;
+  password    : string;
+  displayName ?: string;
 }
 
-export interface postsTypes {
-    subject:        string | null,
-    content:        string | null,
-    image_url:      string | null,
+export interface signinInput {
+  identifier  : string;
+  password    : string;
+  userAgent  ?: string;
+  ipAddress  ?: string;
 }
 
-export interface comments {
-    content:        string | null,
-}
-
-export interface likes {
-    content:        string | null,
-}
