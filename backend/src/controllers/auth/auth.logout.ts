@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import crypto from"crypto";
-import { eq} from "drizzle-orm";
+import crypto from "crypto";
+import { eq } from "drizzle-orm";
 
-import {db} from "../../../db/db.ts";
-import { sessions } from "../../../models/schema.ts";
+import { db } from "../../db/db.ts";
+import { sessions } from "../../models/schema.ts";
 
 class AuthLogout {
 
@@ -25,16 +25,16 @@ class AuthLogout {
     }
 
     public async AuthLogout(rawToken: string) {
-        
-        if (!rawToken) 
+
+        if (!rawToken)
         return;
 
         const tokenHash = this.hashToken(rawToken);
 
         await db
-      .delete(sessions)
-      .where(eq(sessions.tokenHash, tokenHash))
-      .returning({ id: sessions.id });
+            .delete(sessions)
+            .where(eq(sessions.tokenHash, tokenHash))
+            .returning({ id: sessions.id });
 
     }
 

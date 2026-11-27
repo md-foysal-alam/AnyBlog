@@ -14,27 +14,32 @@
 
 import type { Request, Response } from "express";
 
-import asyncHandler from "../../../utils/asyncHandler.ts";
-import AuthLogout from "../../auth/logout/auth.logout.ts";
+import asyncHandler from "../../utils/asyncHandler.ts";
+import AuthVerifyEmail from "./auth.verifyEmail.ts";
 
-class Logout {
+class VerifyEmail {
 
-    public Logout = asyncHandler(
+    public VerifyEmail = asyncHandler(
         async (req: Request, res: Response) => {
-            const authHeader = req.headers.authorization || "";
-            const rawToken   = authHeader.startsWith("Bearer ")
-                ? authHeader.slice(7).trim()
-                : "";
+            const token = req.body?.token || req.query.token;
 
-            await AuthLogout.AuthLogout(rawToken);
+            if (!token || typeof token !== "string") {
+                return res.status(400).json({
+                    success : false,
+                    message : "token is required",
+                });
+            }
+
+            const result = await AuthVerifyEmail.AuthVerifyEmail(token);
 
             return res.status(200).json({
                 success : true,
-                message : "Logged out successfully",
+                message : "Email verified successfully",
+                data    : result,
             });
         }
     )
 
 }
 
-export default new Logout();
+export default new VerifyEmail();

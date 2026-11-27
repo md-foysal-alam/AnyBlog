@@ -36,6 +36,27 @@
       "when": 1795523425345,
       "tag": "0004_outgoing_selene",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795742039147,
+      "tag": "0005_fluffy_pyro",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795796668417,
+      "tag": "0006_opposite_next_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795797097177,
+      "tag": "0007_same_bulldozer",
+      "breakpoints": true
     }
   ]
 }

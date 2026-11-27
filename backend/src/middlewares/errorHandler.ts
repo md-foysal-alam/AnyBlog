@@ -1,37 +1,22 @@
-// Copyright 2026 Foysal Alam Rohan
+import type { ErrorRequestHandler } from "express";
 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+    const statusCode =
+        Number(err?.statusCode) ||
+        Number(err?.status)     ||
+        500;
 
-//     http://www.apache.org/licenses/LICENSE-2.0
+    if (statusCode >= 500) console.error("Error:", err);
 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+    res.status(statusCode).json({
+        success : false,
+        message : err?.message || "Internal server error",
+    });
+};
 
-
-import express from "express";
-
-export const errorHandler = (
-  err   : any,
-  _req  : express.Request,
-  res   : express.Response,
-  _next : express.NextFunction
-) => {
-  console.error("Error:", err);
-
-  let statusCode = parseInt(err.statusCode || err.status, 10);
-  
-  if (isNaN(statusCode)) {
-    statusCode = 500;
-  }
-
-  res.status(statusCode).json({
-    success       : false,
-    message       : err.message || "Internal server error",
-    errorDetails  : typeof err.status === 'string' ? err.status : undefined 
-  });
+export const notFound = (req: any, res: any) => {
+    res.status(404).json({
+        success : false,
+        message : `Route ${req.method} ${req.originalUrl} not found`,
+    });
 };

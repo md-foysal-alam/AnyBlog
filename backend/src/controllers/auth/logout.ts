@@ -12,28 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 
-import asyncHandler from "../../../utils/asyncHandler.ts";
-import AuthVerifySession from "../../auth/verifySession/auth.verifySession.ts";
+import asyncHandler from "../../utils/asyncHandler.ts";
+import AuthLogout from "./auth.logout.ts";
 
-class VerifySession {
+class Logout {
 
-    public VerifySession = asyncHandler(
-        async (req: Request, _res: Response, next: NextFunction) => {
+    public Logout = asyncHandler(
+        async (req: Request, res: Response) => {
             const authHeader = req.headers.authorization || "";
             const rawToken   = authHeader.startsWith("Bearer ")
                 ? authHeader.slice(7).trim()
                 : "";
 
-            const verified = await AuthVerifySession.AuthVerifySession(rawToken);
+            await AuthLogout.AuthLogout(rawToken);
 
-            (req as any).account   = verified.account;
-            (req as any).sessionId = verified.sessionId;
-
-            return next();
+            return res.status(200).json({
+                success : true,
+                message : "Logged out successfully",
+            });
         }
     )
+
 }
 
-export default new VerifySession().VerifySession;
+export default new Logout();

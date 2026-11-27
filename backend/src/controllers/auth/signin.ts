@@ -14,12 +14,12 @@
 
 import type { Request, Response } from "express";
 
-import asyncHandler from "../../../utils/asyncHandler.ts";
-import AuthSignin from "../../auth/signin/auth.signin.ts";
+import asyncHandler from "../../utils/asyncHandler.ts";
+import AuthSignin from "./auth.signin.ts";
 
-class Login {
+class Signin {
 
-    public Login = asyncHandler(
+    public Signin = asyncHandler(
         async (req: Request, res: Response) => {
             const { email, username, identifier, password } = req.body;
             const loginId = identifier || email || username;
@@ -34,13 +34,38 @@ class Login {
             const result = await AuthSignin.AuthSignin({
                 identifier : loginId,
                 password,
+            });
+
+            return res.status(200).json({
+                success : true,
+                message : "Verification code sent to your email.",
+                data    : result,
+            });
+        }
+    )
+
+    public VerifySigninOtp = asyncHandler(
+        async (req: Request, res: Response) => {
+            const { email, username, identifier, otp } = req.body;
+            const loginId = identifier || email || username;
+
+            if (!loginId || !otp) {
+                return res.status(400).json({
+                    success : false,
+                    message : "identifier (email/username) and otp are required",
+                });
+            }
+
+            const result = await AuthSignin.VerifySigninOtp({
+                identifier : loginId,
+                otp,
                 userAgent  : req.headers["user-agent"],
                 ipAddress  : req.ip,
             });
 
             return res.status(200).json({
                 success : true,
-                message : "Logged in successfully",
+                message : "Signed in successfully",
                 data    : {
                     token     : result.token,
                     expiresAt : result.session.expiresAt,
@@ -52,4 +77,4 @@ class Login {
 
 }
 
-export default new Login();
+export default new Signin();

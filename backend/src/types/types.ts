@@ -1,29 +1,36 @@
-// Copyright 2026 Foysal Alam Rohan
+export type SignupInput = {
+    email        : string;
+    username     : string;
+    password     : string;
+    displayName? : string | null;
+};
 
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+export type LoginInput = {
+    identifier : string;         // email OR username
+    password   : string;
+};
 
-//     http://www.apache.org/licenses/LICENSE-2.0
+export type VerifyLoginOtpInput = {
+    identifier : string;
+    otp        : string;
+    userAgent? : string | null;
+    ipAddress? : string | null;
+};
 
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+export type ForgotPasswordOtpInput = {
+    email        : string;
+    otp?         : string;
+    newPassword? : string;
+};
 
+export type CreatePostInput = {
+    title    : string;
+    content  : string;
+    status   : "draft" | "published";
+    imageUrl?: string | null;
+};
 
-export interface SignupInput {
-  email       : string;
-  username    : string;
-  password    : string;
-  displayName ?: string;
-}
-
-export interface signinInput {
-  identifier  : string;
-  password    : string;
-  userAgent  ?: string;
-  ipAddress  ?: string;
-}
-
+export type CreateCommentInput = {
+    content  : string;
+    parentId?: string | null;
+};
