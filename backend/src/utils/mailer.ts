@@ -1,9 +1,7 @@
-import { Resend } from "resend";
 import "dotenv/config";
+import { Resend } from "resend";
 
-// Initialize Resend with your API key from Render environment variables
 const resend = new Resend(process.env.RESEND_API_KEY);
-
 const appName = () => process.env.APP_NAME || "anyBlog";
 
 export const maskEmail = (email: string) => {
@@ -14,10 +12,10 @@ export const maskEmail = (email: string) => {
 class Mailer {
   public async sendSigninOtp(to: string, data: { name: string; otp: string; expiresAt: Date }) {
     await resend.emails.send({
-      from: `${appName()} <onboarding@resend.dev>`, // Use this for testing
+      from: `${appName()} <onboarding@resend.dev>`, // MUST BE onboarding@resend.dev
       to,
       subject: `${appName()} login code`,
-      html: `<h1>Your login code</h1><p>Hi ${data.name}, your code is: <strong>${data.otp}</strong></p>`,
+      html: `<h1>Your login code</h1><p>Hi ${data.name}, your code is: <strong style="font-size:24px">${data.otp}</strong></p>`,
     });
   }
 
@@ -26,7 +24,7 @@ class Mailer {
       from: `${appName()} <onboarding@resend.dev>`,
       to,
       subject: `${appName()} password reset code`,
-      html: `<h1>Password Reset</h1><p>Hi ${data.name}, your reset code is: <strong>${data.otp}</strong></p>`,
+      html: `<h1>Password Reset</h1><p>Hi ${data.name}, your reset code is: <strong style="font-size:24px">${data.otp}</strong></p>`,
     });
   }
 
