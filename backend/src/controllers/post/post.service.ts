@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import appError from "../../utils/appError.ts";
 import { db } from "../../db/db.ts";
-import { posts, media } from "../../models/schema.ts";
+import { posts, media, comments } from "../../models/schema.ts";
 import type { CreatePostInput } from "../../types/types.ts";
 
 class PostService {
@@ -52,12 +52,18 @@ class PostService {
     public async getFeed() {
         const feed = await db.query.posts.findMany({
             where: eq(posts.status, "published"),
-            orderBy: [desc(posts.createdAt)], // 👈 Newest first
+            orderBy: [desc(posts.createdAt)],
             with: {
                 author: {
                     columns: { id: true, username: true, displayName: true, avatarUrl: true }
                 },
                 media: true
+            },
+            extras: {
+                // Correlated subquery — one index hit per row on comments_post_idx
+                commentCount: sql<number>`
+                    (select count(*)::int from ${comments} where ${comments.postId} = ${posts.id})
+                `.as("comment_count"),
             }
         });
         return feed;
@@ -66,12 +72,16 @@ class PostService {
     public async getPostById(postId: string) {
         const post = await db.query.posts.findFirst({
             where: eq(posts.id, postId),
-            // 👈 Removed the invalid orderBy line here
             with: {
                 author: {
                     columns: { id: true, username: true, displayName: true, avatarUrl: true }
                 },
                 media: true
+            },
+            extras: {
+                commentCount: sql<number>`
+                    (select count(*)::int from ${comments} where ${comments.postId} = ${posts.id})
+                `.as("comment_count"),
             }
         });
 
