@@ -43,14 +43,9 @@ export default function Feed() {
           {posts.map((post) => (
             <div key={post.id} className="card blog-card" style={{ maxWidth: "100%", padding: 0, overflow: "hidden" }}>
               
-              {/* Show Cover Image if it exists */}
               {post.media && post.media.length > 0 && (
                 <Link to={`/post/${post.id}`}>
-                  <img 
-                    src={post.media[0].url} 
-                    alt={post.title} 
-                    className="blog-image"
-                  />
+                  <img src={post.media[0].url} alt={post.title} className="blog-image" />
                 </Link>
               )}
 
@@ -61,7 +56,7 @@ export default function Feed() {
                   </Link>
                 </h2>
                 
-                {/* 👇 THE UPDATED AUTHOR META SNIPPET */}
+                {/* Author Meta with Avatar */}
                 <div className="blog-meta" style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <img 
                     src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} 

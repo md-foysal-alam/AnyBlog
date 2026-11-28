@@ -19,9 +19,15 @@ function CommentItem({ comment, replyingTo, setReplyingTo, submitReply, isSubmit
   return (
     <div className="comment">
       <div className="comment-box">
-        <div className="comment-meta">
+        {/* 👇 Added Avatar to Comment Meta */}
+        <div className="comment-meta" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img 
+            src={comment.author?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.author?.username}&background=random`} 
+            alt="avatar" 
+            style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} 
+          />
           <span className="comment-author">{comment.author?.displayName || comment.author?.username}</span>
-          <span className="comment-date">{new Date(comment.createdAt).toLocaleDateString()}</span>
+          <span className="comment-date">• {new Date(comment.createdAt).toLocaleDateString()}</span>
         </div>
         <div className="comment-body">{comment.content}</div>
 
@@ -126,11 +132,19 @@ export default function PostDetail() {
           )}
           <div style={{ padding: "48px 40px 44px" }}>
             <h1 className="post-hero-title">{post.title}</h1>
-            <div className="post-header-meta">
-              <span className="author">{post.author?.username}</span>
+            
+            {/* 👇 Added Avatar to Post Header Meta */}
+            <div className="post-header-meta" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
+              <img 
+                src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} 
+                alt="author" 
+                style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} 
+              />
+              <span className="author" style={{ fontWeight: 600 }}>{post.author?.displayName || post.author?.username}</span>
               <span>•</span>
-              <span>{new Date(post.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+              <span className="muted">{new Date(post.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
             </div>
+
             <div className="prose">{post.content}</div>
           </div>
         </div>

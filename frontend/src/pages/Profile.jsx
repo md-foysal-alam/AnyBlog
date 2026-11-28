@@ -37,7 +37,7 @@ export default function Profile() {
       formData.append("githubUrl", form.githubUrl);
       formData.append("linkedinUrl", form.linkedinUrl);
       
-      // Append the image file if selected (Key MUST be "avatar")
+      // Append the image file if selected
       if (avatar) {
         formData.append("avatar", avatar); 
       }
@@ -48,7 +48,7 @@ export default function Profile() {
         method: "PUT",
         headers: { 
           Authorization: `Bearer ${token}` 
-          // DO NOT set Content-Type here. Let the browser do it.
+          // Note: Do NOT set Content-Type here.
         },
         body: formData,
       });
@@ -56,7 +56,7 @@ export default function Profile() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to update profile");
 
-      await refreshAccount(); // Update AuthContext to show new avatar everywhere
+      await refreshAccount(); // Refresh AuthContext to show new avatar everywhere
       nav("/dashboard");
     } catch (err) {
       setError(err.message);

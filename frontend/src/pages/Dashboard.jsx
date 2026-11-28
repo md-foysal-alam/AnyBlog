@@ -53,7 +53,7 @@ export default function Dashboard() {
                 </p>
               )}
 
-              {/* 👇 NEW: Social Link Items */}
+              {/* Social Link Items */}
               <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
                 {account.websiteUrl && (
                   <a href={account.websiteUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 13, borderRadius: 20 }}>
