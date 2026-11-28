@@ -45,7 +45,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
     if (accountData) setAccount(accountData);
-    // Fetch stats immediately after login
     loadUser(newToken);
   }, [loadUser]);
 

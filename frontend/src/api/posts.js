@@ -45,7 +45,7 @@ export const postApi = {
   addComment: (postId, content, parentId, token) =>
     request(`/posts/${postId}/comments`, { 
       method: "POST", 
-      body: { content, parentId }, // 👈 Now sends parentId
+      body: { content, parentId }, 
       token 
     }),
 };
