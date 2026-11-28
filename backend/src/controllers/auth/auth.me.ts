@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 
 import appError from "../../utils/appError.ts";
 
@@ -49,7 +49,7 @@ class AuthMe {
             })
             .from(posts)
             .where(eq(posts.authorId, account.id))
-            .orderBy(posts.createdAt);
+            .orderBy(desc(posts.createdAt));
 
         return {
             account,
