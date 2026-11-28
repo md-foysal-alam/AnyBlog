@@ -9,7 +9,7 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the specific language governing permissions and
+// See the License for the specific language governing permissions and
 // limitations under the License.
 
 import { relations } from "drizzle-orm";
@@ -25,17 +25,17 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-// ============================================
-// ENUMS
-// ============================================
+/* ============================================
+ * ENUMS
+ * ============================================ */
 
 export const mediaTypeEnum  = pgEnum("media_type", ["photo", "video"]);
 export const postStatusEnum = pgEnum("post_status", ["draft", "published"]);
 export const otpPurposeEnum = pgEnum("otp_purpose", ["signin", "password_reset"]);
 
-// ============================================
-// ACCOUNTS (public profile)
-// ============================================
+/* ============================================
+ * ACCOUNTS
+ * ============================================ */
 
 export const accounts = pgTable("accounts", {
   id:            uuid("id").defaultRandom().primaryKey(),
@@ -48,15 +48,15 @@ export const accounts = pgTable("accounts", {
   twitterUrl:    text("twitter_url"),
   githubUrl:     text("github_url"),
   linkedinUrl:   text("linkedin_url"),
-  
+
   emailVerified: boolean("email_verified").default(false).notNull(),
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   updatedAt:     timestamp("updated_at").defaultNow().notNull(),
 });
 
-// ============================================
-// CREDENTIALS (password auth)
-// ============================================
+/* ============================================
+ * CREDENTIALS
+ * ============================================ */
 
 export const credentials = pgTable(
   "credentials",
@@ -74,9 +74,9 @@ export const credentials = pgTable(
   ]
 );
 
-// ============================================
-// SESSIONS
-// ============================================
+/* ============================================
+ * SESSIONS
+ * ============================================ */
 
 export const sessions = pgTable(
   "sessions",
@@ -97,9 +97,9 @@ export const sessions = pgTable(
   ]
 );
 
-// ============================================
-// EMAIL VERIFICATION TOKENS
-// ============================================
+/* ============================================
+ * EMAIL VERIFICATIONS
+ * ============================================ */
 
 export const emailVerifications = pgTable(
   "email_verifications",
@@ -119,9 +119,9 @@ export const emailVerifications = pgTable(
   ]
 );
 
-// ============================================
-// OTP CODES (sign-in 2-step + password reset)
-// ============================================
+/* ============================================
+ * OTP CODES
+ * ============================================ */
 
 export const otpCodes = pgTable(
   "otp_codes",
@@ -142,9 +142,9 @@ export const otpCodes = pgTable(
   ]
 );
 
-// ============================================
-// POSTS
-// ============================================
+/* ============================================
+ * POSTS
+ * ============================================ */
 
 export const posts = pgTable(
   "posts",
@@ -167,9 +167,9 @@ export const posts = pgTable(
   ]
 );
 
-// ============================================
-// MEDIA
-// ============================================
+/* ============================================
+ * MEDIA
+ * ============================================ */
 
 export const media = pgTable(
   "media",
@@ -188,9 +188,34 @@ export const media = pgTable(
   ]
 );
 
-// ============================================
-// COMMENTS & REPLIES
-// ============================================
+/* ============================================
+ * POST REACTIONS  ← NEW
+ * One row per (post, user). Toggling deletes/inserts.
+ * ============================================ */
+
+export const postReactions = pgTable(
+  "post_reactions",
+  {
+    id:        uuid("id").defaultRandom().primaryKey(),
+    postId:    uuid("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("post_reactions_post_account_unique")
+      .on(table.postId, table.accountId),
+    index("post_reactions_post_idx").on(table.postId),
+    index("post_reactions_account_idx").on(table.accountId),
+  ]
+);
+
+/* ============================================
+ * COMMENTS
+ * ============================================ */
 
 export const comments = pgTable(
   "comments",
@@ -216,9 +241,9 @@ export const comments = pgTable(
   ]
 );
 
-// ============================================
-// RELATIONS
-// ============================================
+/* ============================================
+ * RELATIONS
+ * ============================================ */
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
   credential: one(credentials, {
@@ -230,6 +255,7 @@ export const accountsRelations = relations(accounts, ({ one, many }) => ({
   otpCodes:           many(otpCodes),
   posts:              many(posts),
   comments:           many(comments),
+  reactions:          many(postReactions),
 }));
 
 export const credentialsRelations = relations(credentials, ({ one }) => ({
@@ -261,18 +287,30 @@ export const otpCodesRelations = relations(otpCodes, ({ one }) => ({
 }));
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
-  author: one(accounts, {
+  author:    one(accounts, {
     fields:     [posts.authorId],
     references: [accounts.id],
   }),
-  media:    many(media),
-  comments: many(comments),
+  media:     many(media),
+  comments:  many(comments),
+  reactions: many(postReactions),
 }));
 
 export const mediaRelations = relations(media, ({ one }) => ({
   post: one(posts, {
     fields:     [media.postId],
     references: [posts.id],
+  }),
+}));
+
+export const postReactionsRelations = relations(postReactions, ({ one }) => ({
+  post: one(posts, {
+    fields:     [postReactions.postId],
+    references: [posts.id],
+  }),
+  account: one(accounts, {
+    fields:     [postReactions.accountId],
+    references: [accounts.id],
   }),
 }));
 
