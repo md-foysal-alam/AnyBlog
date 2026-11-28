@@ -7,7 +7,7 @@ import VerifyEmail     from "../controllers/auth/verifyEmail.ts";
 import ForgotPassword  from "../controllers/auth/forgotpass.ts";
 import VerifySession   from "../controllers/auth/verifySession.ts";
 
-import authMe from "../controllers/auth/auth.me.ts";
+import Me from "../controllers/auth/me.ts"
 
 const router = Router();
 
@@ -21,6 +21,7 @@ router.post("/verify-email",   VerifyEmail.VerifyEmail);
 router.post("/forgot-password",ForgotPassword.ForgotPassword);
 
 // Protected
-router.get ("/me", VerifySession, authMe.AuthMe);
+// 👈 Corrected the route to use the 'Me' controller
+router.get ("/me", VerifySession, Me.Me);
 
 export default router;
