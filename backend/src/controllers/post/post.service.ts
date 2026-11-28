@@ -38,7 +38,7 @@ class PostService {
     public async getFeed() {
         const feed = await db.query.posts.findMany({
             where: eq(posts.status, "published"),
-            orderBy: [desc(posts.createdAt)], 
+            orderBy: [desc(posts.createdAt)], // 👈 Newest posts first
             with: {
                 author: {
                     columns: { id: true, username: true, displayName: true, avatarUrl: true }

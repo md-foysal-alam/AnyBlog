@@ -5,11 +5,9 @@ import Signin          from "../controllers/auth/signin.ts";
 import Logout          from "../controllers/auth/logout.ts";
 import VerifyEmail     from "../controllers/auth/verifyEmail.ts";
 import ForgotPassword  from "../controllers/auth/forgotpass.ts";
-import Me              from "../controllers/auth/me.ts";
 import VerifySession   from "../controllers/auth/verifySession.ts";
 
-import PostController from "../controllers/post/post.controller.ts";
-import CommentController from "../controllers/comment/comment.controller.ts";
+import authMe from "../controllers/auth/auth.me.ts";
 
 const router = Router();
 
@@ -23,6 +21,6 @@ router.post("/verify-email",   VerifyEmail.VerifyEmail);
 router.post("/forgot-password",ForgotPassword.ForgotPassword);
 
 // Protected
-router.get ("/me", VerifySession, Me.Me);
+router.get ("/me", VerifySession, authMe.AuthMe);
 
 export default router;
