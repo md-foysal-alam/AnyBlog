@@ -36,10 +36,9 @@ class PostService {
     }
 
     public async getFeed() {
-        // Using Drizzle relational query to automatically fetch media and author
         const feed = await db.query.posts.findMany({
             where: eq(posts.status, "published"),
-            orderBy: [desc(posts.publishedAt), desc(posts.createdAt)],
+            orderBy: [desc(posts.createdAt)], 
             with: {
                 author: {
                     columns: { id: true, username: true, displayName: true, avatarUrl: true }
