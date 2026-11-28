@@ -25,7 +25,7 @@ export default function Dashboard() {
         <div className="card wide split">
           
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            {/* 1. Avatar */}
+            {/* Avatar */}
             <img 
               src={account.avatarUrl || `https://ui-avatars.com/api/?name=${account.username}&background=random`} 
               alt="avatar" 
@@ -33,12 +33,12 @@ export default function Dashboard() {
             />
             
             <div>
-              {/* 2. Name */}
+              {/* Name */}
               <h2 style={{ margin: 0, fontSize: 30 }}>
                 Welcome, {account.displayName || account.username} 👋
               </h2>
               
-              {/* 3. Email & Badge */}
+              {/* Email & Badge */}
               <p className="muted" style={{ margin: "6px 0 0" }}>
                 {account.email}{" "}
                 {account.emailVerified
@@ -46,11 +46,37 @@ export default function Dashboard() {
                   : <span className="badge badge-warn">unverified</span>}
               </p>
 
+              {/* Bio */}
               {account.bio && (
                 <p style={{ margin: "12px 0 0", fontSize: 15, color: "var(--text)", fontStyle: "italic", lineHeight: 1.5 }}>
                   "{account.bio}"
                 </p>
               )}
+
+              {/* 👇 NEW: Social Link Items */}
+              <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
+                {account.websiteUrl && (
+                  <a href={account.websiteUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 13, borderRadius: 20 }}>
+                    🌐 Website
+                  </a>
+                )}
+                {account.twitterUrl && (
+                  <a href={account.twitterUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 13, borderRadius: 20 }}>
+                    🐦 Twitter / X
+                  </a>
+                )}
+                {account.githubUrl && (
+                  <a href={account.githubUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 13, borderRadius: 20 }}>
+                    💻 GitHub
+                  </a>
+                )}
+                {account.linkedinUrl && (
+                  <a href={account.linkedinUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ padding: "6px 12px", fontSize: 13, borderRadius: 20 }}>
+                    💼 LinkedIn
+                  </a>
+                )}
+              </div>
+
             </div>
           </div>
 
