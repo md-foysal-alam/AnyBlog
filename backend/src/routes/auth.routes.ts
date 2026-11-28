@@ -5,7 +5,7 @@ import Signin          from "../controllers/auth/signin.ts";
 import Logout          from "../controllers/auth/logout.ts";
 import VerifyEmail     from "../controllers/auth/verifyEmail.ts";
 import ForgotPassword  from "../controllers/auth/forgotpass.ts";
-import VerifySession   from "../controllers/auth/verifySession.ts";
+import AuthVerifySession   from "../controllers/auth/verifySession.ts";
 
 import Me from "../controllers/auth/me.ts"
 
@@ -22,6 +22,6 @@ router.post("/forgot-password",ForgotPassword.ForgotPassword);
 
 // Protected
 // 👈 Corrected the route to use the 'Me' controller
-router.get ("/me", VerifySession, Me.Me);
+router.get ("/me", AuthVerifySession.AuthVerifySession, Me.Me);
 
 export default router;
