@@ -3,85 +3,219 @@ import { Link } from "react-router-dom";
 import { postApi } from "../api/posts.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
+/* =========================================================================
+ * Helpers
+ * ========================================================================= */
+
+const readingTime = (content = "") => {
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+};
+
+const excerpt = (content = "", max = 180) => {
+  const clean = content.replace(/\s+/g, " ").trim();
+  return clean.length <= max ? clean : clean.slice(0, max).trimEnd() + "…";
+};
+
+const formatDate = (iso) => {
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleDateString(undefined, {
+    month: "short", day: "numeric", year: "numeric",
+  });
+};
+
+const avatarUrl = (user) =>
+  user?.avatarUrl ||
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    user?.username || "user"
+  )}&background=af6a51&color=fff`;
+
+/* =========================================================================
+ * Feed
+ * ========================================================================= */
+
 export default function Feed() {
-  const { account } = useAuth();
-  const [posts, setPosts] = useState([]);
+  const { account, stats } = useAuth();
+
+  const [posts,   setPosts]   = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     postApi.getFeed()
-      .then((res) => setPosts(res.data || []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .then((res) => { if (!cancelled) setPosts(res?.data ?? []); })
+      .catch((err) => { if (!cancelled) setError(err.message || "Failed to load feed."); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
   }, []);
 
   return (
     <>
+      {/* ============================== TOPBAR ============================== */}
       <header className="topbar">
-        <strong>anyBlog</strong>
+        <Link to="/" className="brand">anyBlog</Link>
         <div className="topbar-right">
           {account ? (
-            <Link to="/dashboard" className="btn btn-ghost">Dashboard</Link>
+            <Link to="/dashboard" className="btn btn-ghost btn-sm">Dashboard</Link>
           ) : (
-            <Link to="/signin" className="btn btn-primary">Sign In</Link>
+            <Link to="/signin" className="btn btn-primary btn-sm">Sign In</Link>
           )}
         </div>
       </header>
 
-      <main className="container">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h1 style={{ margin: 0 }}>Latest Stories</h1>
-          {account && (
-            <Link to="/write" className="btn btn-primary">Write a Post</Link>
-          )}
-        </div>
+      <div className="feed-layout">
+        {/* ============================ SIDEBAR ============================ */}
+        <aside className="feed-sidebar">
+          {account ? (
+            <div className="side-profile">
+              <img src={avatarUrl(account)} alt={account.username} className="side-avatar" />
+              <div className="side-name">{account.displayName || account.username}</div>
+              <div className="side-handle">@{account.username}</div>
 
-        {loading && <p className="muted">Loading feed...</p>}
-        {!loading && posts.length === 0 && <p className="muted">No posts yet. Be the first to write one!</p>}
+              <Link to="/write" className="btn btn-primary block" style={{ marginTop: 14 }}>
+                ✍️ Write a Post
+              </Link>
+              <Link to="/dashboard" className="btn btn-ghost block" style={{ marginTop: 8 }}>
+                📊 Dashboard
+              </Link>
 
-        <div style={{ display: "grid", gap: 32 }}>
-          {posts.map((post) => (
-            <div key={post.id} className="card blog-card" style={{ maxWidth: "100%", padding: 0, overflow: "hidden" }}>
-              
-              {post.media && post.media.length > 0 && (
-                <Link to={`/post/${post.id}`}>
-                  <img src={post.media[0].url} alt={post.title} className="blog-image" />
-                </Link>
-              )}
-
-              <div className="blog-content">
-                <h2 className="blog-title">
-                  <Link to={`/post/${post.id}`} style={{ color: "var(--text)" }}>
-                    {post.title}
-                  </Link>
-                </h2>
-                
-                {/* Author Meta with Avatar */}
-                <div className="blog-meta" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <img 
-                    src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} 
-                    alt="author" 
-                    style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} 
-                  />
-                  <span>By {post.author?.displayName || post.author?.username}</span>
-                  <span>•</span>
-                  <span>{new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              {/* Real stats from AuthContext */}
+              <div className="side-stats">
+                <div className="side-stat">
+                  <span className="side-stat-num">{stats.totalPosts}</span>
+                  <span className="side-stat-label">Posts</span>
                 </div>
-
-                <p className="blog-excerpt">
-                  {post.content.substring(0, 160)}...
-                </p>
-                
-                <div>
-                  <Link to={`/post/${post.id}`} style={{ fontWeight: 600, fontSize: 15 }}>
-                    Read Full Story →
-                  </Link>
+                <div className="side-stat">
+                  <span className="side-stat-num">{stats.publishedPosts}</span>
+                  <span className="side-stat-label">Published</span>
+                </div>
+                <div className="side-stat">
+                  <span className="side-stat-num">{stats.draftPosts}</span>
+                  <span className="side-stat-label">Drafts</span>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </main>
+          ) : (
+            <div className="side-cta">
+              <h3>Welcome to anyBlog</h3>
+              <p className="muted">Join a community of writers and readers.</p>
+              <Link to="/signin" className="btn btn-primary block">Sign In</Link>
+              <Link to="/signup" className="btn btn-ghost block" style={{ marginTop: 8 }}>
+                Create Account
+              </Link>
+            </div>
+          )}
+
+          <nav className="side-nav">
+            <Link to="/" className="side-nav-item active">🏠 Home</Link>
+            <Link to="/tags" className="side-nav-item">🏷️ Tags</Link>
+            <Link to="/trending" className="side-nav-item">🔥 Trending</Link>
+            <Link to="/about" className="side-nav-item">ℹ️ About</Link>
+          </nav>
+        </aside>
+
+        {/* ============================== MAIN ============================== */}
+        <main className="feed-main">
+          <div className="page-head">
+            <h1>Latest Stories</h1>
+            <div className="feed-tabs">
+              <button className="feed-tab active">Hot</button>
+              <button className="feed-tab">New</button>
+              <button className="feed-tab">Top</button>
+            </div>
+          </div>
+
+          {loading && <p className="muted">Loading feed…</p>}
+
+          {!loading && error && (
+            <div className="alert alert-error">{error}</div>
+          )}
+
+          {!loading && !error && posts.length === 0 && (
+            <p className="muted">No posts yet. Be the first to write one!</p>
+          )}
+
+          <div className="feed-list">
+            {posts.map((post) => (
+              <article key={post.id} className="feed-card">
+                {/* ---- Vote column ----
+                    Placeholder until backend exposes post.voteCount.
+                    Wire onClick → POST /posts/:id/vote when ready. */}
+                <div className="vote-col">
+                  <button className="vote-btn" aria-label="Upvote" title="Voting coming soon">▲</button>
+                  <span className="vote-count">{post.voteCount ?? 0}</span>
+                  <button className="vote-btn" aria-label="Downvote" title="Voting coming soon">▼</button>
+                </div>
+
+                <div className="feed-card-body">
+                  {/* Meta row — all real data */}
+                  <div className="feed-card-meta">
+                    <img
+                      src={avatarUrl(post.author)}
+                      alt={post.author?.username || "author"}
+                      className="feed-avatar"
+                    />
+                    <span className="feed-author">
+                      {post.author?.displayName || post.author?.username || "Anonymous"}
+                    </span>
+                    <span className="feed-sep">•</span>
+                    <span className="feed-date">{formatDate(post.createdAt)}</span>
+                    <span className="feed-sep">•</span>
+                    <span className="feed-read">{readingTime(post.content)} min read</span>
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="feed-card-title">
+                    <Link to={`/post/${post.id}`}>{post.title}</Link>
+                  </h2>
+
+                  {/* Image — only if media exists */}
+                  {post.media?.[0]?.url && (
+                    <Link to={`/post/${post.id}`} className="feed-thumb-link">
+                      <img
+                        src={post.media[0].url}
+                        alt={post.title}
+                        className="feed-thumb"
+                        loading="lazy"
+                      />
+                    </Link>
+                  )}
+
+                  {/* Excerpt */}
+                  <p className="feed-card-excerpt">{excerpt(post.content)}</p>
+
+                  {/* Tags — only render if backend sends them */}
+                  {Array.isArray(post.tags) && post.tags.length > 0 && (
+                    <div className="feed-card-tags">
+                      {post.tags.map((tag) => (
+                        <span key={tag} className="tag">#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Engagement row */}
+                  <div className="feed-actions">
+                    <button className="action-btn" title="Likes coming soon">❤️ {post.likeCount ?? 0}</button>
+                    <Link
+                      to={`/post/${post.id}#comments`}
+                      className="action-btn"
+                    >
+                      💬 {post.commentCount ?? 0}
+                    </Link>
+                    <button className="action-btn">🔖 Save</button>
+                    <Link to={`/post/${post.id}`} className="action-btn action-read-more">
+                      Read more →
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </main>
+      </div>
     </>
   );
 }
