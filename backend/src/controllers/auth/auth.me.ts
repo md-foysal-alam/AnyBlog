@@ -1,16 +1,11 @@
 import { eq, sql, desc } from "drizzle-orm";
-
 import appError from "../../utils/appError.ts";
-
 import { db } from "../../db/db.ts";
 import { accounts, posts } from "../../models/schema.ts";
 
 class AuthMe {
-
     public async AuthMe(accountId: string) {
-
-        if (!accountId)
-        throw new appError("Unauthorized.", 401);
+        if (!accountId) throw new appError("Unauthorized.", 401);
 
         const [account] = await db
             .select({
@@ -20,6 +15,12 @@ class AuthMe {
                 displayName   : accounts.displayName,
                 avatarUrl     : accounts.avatarUrl,
                 bio           : accounts.bio,
+                // 👇 ADD THESE 4 LINES
+                websiteUrl    : accounts.websiteUrl,
+                twitterUrl    : accounts.twitterUrl,
+                githubUrl     : accounts.githubUrl,
+                linkedinUrl   : accounts.linkedinUrl,
+                
                 emailVerified : accounts.emailVerified,
                 createdAt     : accounts.createdAt,
             })
@@ -27,8 +28,7 @@ class AuthMe {
             .where(eq(accounts.id, accountId))
             .limit(1);
 
-        if (!account)
-        throw new appError("Account not found.", 404);
+        if (!account) throw new appError("Account not found.", 404);
 
         const [stats] = await db
             .select({
@@ -58,5 +58,4 @@ class AuthMe {
         };
     }
 }
-
 export default new AuthMe();
