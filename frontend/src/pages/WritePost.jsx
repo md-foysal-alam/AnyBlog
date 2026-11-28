@@ -24,7 +24,7 @@ export default function WritePost() {
       if (image) {
         const formData = new FormData();
         formData.append("image", image);
-        const uploadRes = await fetch("https://anyblog.onrender.com/upload", {
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
