@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Feed from "./pages/Feed.jsx";
 import WritePost from "./pages/WritePost.jsx";
 import PostDetail from "./pages/PostDetail.jsx";
+import Profile from "./pages/Profile.jsx";
+
 
 function Splash() { return <div className="center">Loading…</div>; }
 
@@ -38,6 +40,8 @@ export default function App() {
       <Route path="/verify-email" element={<VerifyEmail />} />
       
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      
       <Route path="/write" element={<ProtectedRoute><WritePost /></ProtectedRoute>} />
       
       <Route path="*" element={<div className="center">Page not found. <a href="/">Go home</a></div>} />

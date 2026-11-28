@@ -18,7 +18,7 @@ export default function Feed() {
   return (
     <>
       <header className="topbar">
-        <Link to="/" className="brand">anyBlog</Link>
+        <strong>anyBlog</strong>
         <div className="topbar-right">
           {account ? (
             <Link to="/dashboard" className="btn btn-ghost">Dashboard</Link>
@@ -29,8 +29,8 @@ export default function Feed() {
       </header>
 
       <main className="container">
-        <div className="page-head" style={{ marginBottom: 8 }}>
-          <h1>Latest Stories</h1>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <h1 style={{ margin: 0 }}>Latest Stories</h1>
           {account && (
             <Link to="/write" className="btn btn-primary">Write a Post</Link>
           )}
@@ -41,26 +41,44 @@ export default function Feed() {
 
         <div style={{ display: "grid", gap: 32 }}>
           {posts.map((post) => (
-            <div key={post.id} className="card wide blog-card" style={{ padding: 0 }}>
+            <div key={post.id} className="card blog-card" style={{ maxWidth: "100%", padding: 0, overflow: "hidden" }}>
+              
+              {/* Show Cover Image if it exists */}
               {post.media && post.media.length > 0 && (
                 <Link to={`/post/${post.id}`}>
-                  <img src={post.media[0].url} alt={post.title} className="blog-image" />
+                  <img 
+                    src={post.media[0].url} 
+                    alt={post.title} 
+                    className="blog-image"
+                  />
                 </Link>
               )}
+
               <div className="blog-content">
                 <h2 className="blog-title">
-                  <Link to={`/post/${post.id}`}>{post.title}</Link>
+                  <Link to={`/post/${post.id}`} style={{ color: "var(--text)" }}>
+                    {post.title}
+                  </Link>
                 </h2>
-                <div className="blog-meta">
-                  <span>By {post.author?.username || "Unknown"}</span>
+                
+                {/* 👇 THE UPDATED AUTHOR META SNIPPET */}
+                <div className="blog-meta" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <img 
+                    src={post.author?.avatarUrl || `https://ui-avatars.com/api/?name=${post.author?.username}&background=random`} 
+                    alt="author" 
+                    style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} 
+                  />
+                  <span>By {post.author?.displayName || post.author?.username}</span>
                   <span>•</span>
                   <span>{new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
+
                 <p className="blog-excerpt">
                   {post.content.substring(0, 160)}...
                 </p>
+                
                 <div>
-                  <Link to={`/post/${post.id}`} className="read-more">
+                  <Link to={`/post/${post.id}`} style={{ fontWeight: 600, fontSize: 15 }}>
                     Read Full Story →
                   </Link>
                 </div>

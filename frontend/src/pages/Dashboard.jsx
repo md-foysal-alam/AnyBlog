@@ -34,7 +34,10 @@ export default function Dashboard() {
                 : <span className="badge badge-warn">unverified</span>}
             </p>
           </div>
-          <Link to="/write" className="btn btn-primary">Write a Post ✍️</Link>
+          <div style={{ display: "flex", gap: 12 }}>
+            <Link to="/write" className="btn btn-primary">Write a Post ✍️</Link>
+          <Link to="/profile" className="btn btn-ghost">Edit Profile</Link>
+      </div>
         </div>
 
         <div className="card wide">
