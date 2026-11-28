@@ -23,21 +23,42 @@ export default function Dashboard() {
 
       <main className="container">
         <div className="card wide split">
-          <div>
-            <h2 style={{ margin: 0, fontSize: 30 }}>
-              Welcome, {account.displayName || account.username} 👋
-            </h2>
-            <p className="muted" style={{ margin: "6px 0 0" }}>
-              {account.email}{" "}
-              {account.emailVerified
-                ? <span className="badge badge-ok">verified</span>
-                : <span className="badge badge-warn">unverified</span>}
-            </p>
+          
+          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+            {/* 1. Avatar */}
+            <img 
+              src={account.avatarUrl || `https://ui-avatars.com/api/?name=${account.username}&background=random`} 
+              alt="avatar" 
+              style={{ width: 64, height: 64, borderRadius: "50%", objectFit: "cover", border: "2px solid var(--border)" }}
+            />
+            
+            <div>
+              {/* 2. Name */}
+              <h2 style={{ margin: 0, fontSize: 30 }}>
+                Welcome, {account.displayName || account.username} 👋
+              </h2>
+              
+              {/* 3. Email & Badge */}
+              <p className="muted" style={{ margin: "6px 0 0" }}>
+                {account.email}{" "}
+                {account.emailVerified
+                  ? <span className="badge badge-ok">verified</span>
+                  : <span className="badge badge-warn">unverified</span>}
+              </p>
+
+              {account.bio && (
+                <p style={{ margin: "12px 0 0", fontSize: 15, color: "var(--text)", fontStyle: "italic", lineHeight: 1.5 }}>
+                  "{account.bio}"
+                </p>
+              )}
+            </div>
           </div>
+
+          {/* Buttons */}
           <div style={{ display: "flex", gap: 12 }}>
             <Link to="/write" className="btn btn-primary">Write a Post ✍️</Link>
-          <Link to="/profile" className="btn btn-ghost">Edit Profile</Link>
-      </div>
+            <Link to="/profile" className="btn btn-ghost">Edit Profile</Link>
+          </div>
         </div>
 
         <div className="card wide">
