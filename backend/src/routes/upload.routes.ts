@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { upload } from "../utils/upload.ts";
 import UploadController from "../controllers/upload/upload.controller.ts";
-import VeriafySession from "../controllers/auth/verifySession.ts";
+import VerifySession from "../controllers/auth/verifySession.ts";
 
 const router = Router();
 
