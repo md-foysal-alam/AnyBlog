@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { postApi } from "../api/posts.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -26,8 +26,55 @@ const avatarUrl = (user) =>
     user?.username || "user"
   )}&background=af6a51&color=fff`;
 
+/* =====================================================================
+ * React button — own state so each card updates independently
+ * ===================================================================== */
+function ReactButton({ post, account, token, onNeedAuth }) {
+  const [liked,  setLiked]  = useState(Boolean(post.likedByMe));
+  const [count,  setCount]  = useState(Number(post.likeCount ?? 0));
+  const [busy,   setBusy]   = useState(false);
+
+  const click = async () => {
+    if (!account) { onNeedAuth(); return; }
+    if (busy) return;
+
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setCount((c) => Math.max(0, c + (wasLiked ? -1 : 1)));
+    setBusy(true);
+
+    try {
+      const res = await postApi.reactToPost(post.id, token);
+      setLiked(Boolean(res.data.liked));
+      setCount(Number(res.data.likeCount));
+    } catch {
+      setLiked(wasLiked);
+      setCount((c) => Math.max(0, c + (wasLiked ? 1 : -1)));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className={`action-btn action-like ${liked ? "liked" : ""}`}
+      onClick={click}
+      disabled={busy}
+      aria-pressed={liked}
+      aria-label={liked ? "Remove reaction" : "React with love"}
+    >
+      <span className="heart">{liked ? "❤️" : "🤍"}</span> {count}
+    </button>
+  );
+}
+
+/* =====================================================================
+ * Feed
+ * ===================================================================== */
 export default function Feed() {
-  const { account, stats } = useAuth();
+  const { account, stats, token } = useAuth();
+  const nav = useNavigate();
 
   const [posts,   setPosts]   = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,13 +83,15 @@ export default function Feed() {
   useEffect(() => {
     let cancelled = false;
 
-    postApi.getFeed()
+    postApi.getFeed(token)
       .then((res) => { if (!cancelled) setPosts(res?.data ?? []); })
       .catch((err) => { if (!cancelled) setError(err.message || "Failed to load feed."); })
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, []);
+  }, [token]);
+
+  const needAuth = () => nav("/signin", { state: { from: "/" } });
 
   return (
     <>
@@ -117,11 +166,7 @@ export default function Feed() {
           </div>
 
           {loading && <p className="muted">Loading feed…</p>}
-
-          {!loading && error && (
-            <div className="alert alert-error">{error}</div>
-          )}
-
+          {!loading && error && <div className="alert alert-error">{error}</div>}
           {!loading && !error && posts.length === 0 && (
             <p className="muted">No posts yet. Be the first to write one!</p>
           )}
@@ -168,23 +213,17 @@ export default function Feed() {
 
                   <p className="feed-card-excerpt">{excerpt(post.content)}</p>
 
-                  {Array.isArray(post.tags) && post.tags.length > 0 && (
-                    <div className="feed-card-tags">
-                      {post.tags.map((tag) => (
-                        <span key={tag} className="tag">#{tag}</span>
-                      ))}
-                    </div>
-                  )}
-
                   <div className="feed-actions">
-                    <button className="action-btn" title="Likes coming soon">❤️ {post.likeCount ?? 0}</button>
-                    <Link
-                      to={`/post/${post.id}#comments`}
-                      className="action-btn"
-                    >
+                    <ReactButton
+                      post={post}
+                      account={account}
+                      token={token}
+                      onNeedAuth={needAuth}
+                    />
+                    <Link to={`/post/${post.id}#comments`} className="action-btn">
                       💬 {post.commentCount != null ? post.commentCount : "Comments"}
                     </Link>
-                    <button className="action-btn">🔖 Save</button>
+                    <button className="action-btn" type="button">🔖 Save</button>
                     <Link to={`/post/${post.id}`} className="action-btn action-read-more">
                       Read more →
                     </Link>

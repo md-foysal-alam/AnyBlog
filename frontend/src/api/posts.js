@@ -27,25 +27,19 @@ async function request(path, { method = "GET", body, token } = {}) {
 }
 
 export const postApi = {
-  // Get all published posts (public feed)
-  getFeed: () => request("/posts"),
-
-  // Get a single post by ID
-  getPost: (id) => request(`/posts/${id}`),
-
-  // Create a new post (requires auth)
-  createPost: (payload, token) =>
+  getFeed:   (token)       => request("/posts",                { token }),
+  getPost:   (id, token)   => request(`/posts/${id}`,          { token }),
+  createPost:(payload, token) =>
     request("/posts", { method: "POST", body: payload, token }),
 
-  // Get comments for a post
-  getComments: (postId) => request(`/posts/${postId}/comments`),
-
-  // Add a comment to a post (requires auth)
-    // Add a comment to a post (requires auth)
+  getComments: (postId)    => request(`/posts/${postId}/comments`),
   addComment: (postId, content, parentId, token) =>
-    request(`/posts/${postId}/comments`, { 
-      method: "POST", 
-      body: { content, parentId }, 
-      token 
+    request(`/posts/${postId}/comments`, {
+      method: "POST",
+      body: { content, parentId },
+      token,
     }),
+
+  reactToPost: (postId, token) =>
+    request(`/posts/${postId}/react`, { method: "POST", token }),
 };

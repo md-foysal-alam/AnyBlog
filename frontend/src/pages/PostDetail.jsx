@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { postApi } from "../api/posts.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -23,6 +23,48 @@ const formatShortDate = (iso) => {
   });
 };
 
+/* ---------------- React (heart) button ---------------- */
+function ReactButton({ post, account, token, onNeedAuth }) {
+  const [liked, setLiked] = useState(Boolean(post.likedByMe));
+  const [count, setCount] = useState(Number(post.likeCount ?? 0));
+  const [busy,  setBusy]  = useState(false);
+
+  const click = async () => {
+    if (!account) { onNeedAuth(); return; }
+    if (busy) return;
+
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setCount((c) => Math.max(0, c + (wasLiked ? -1 : 1)));
+    setBusy(true);
+
+    try {
+      const res = await postApi.reactToPost(post.id, token);
+      setLiked(Boolean(res.data.liked));
+      setCount(Number(res.data.likeCount));
+    } catch {
+      setLiked(wasLiked);
+      setCount((c) => Math.max(0, c + (wasLiked ? 1 : -1)));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className={`post-react-btn ${liked ? "liked" : ""}`}
+      onClick={click}
+      disabled={busy}
+      aria-pressed={liked}
+    >
+      <span className="post-react-icon">{liked ? "❤️" : "🤍"}</span>
+      <span className="post-react-count">{count}</span>
+    </button>
+  );
+}
+
+/* ---------------- Comment node ---------------- */
 function CommentItem({
   comment, replyingTo, setReplyingTo, submitReply, isSubmitting,
   isNew, registerRef,
@@ -96,9 +138,11 @@ function CommentItem({
   );
 }
 
+/* ---------------- Page ---------------- */
 export default function PostDetail() {
   const { id } = useParams();
   const { account, token } = useAuth();
+  const nav = useNavigate();
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -110,11 +154,10 @@ export default function PostDetail() {
 
   const newCommentRef = useRef(null);
 
-  // Fetch post + comments (public — works without login)
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([postApi.getPost(id), postApi.getComments(id)])
+    Promise.all([postApi.getPost(id, token), postApi.getComments(id)])
       .then(([postRes, commentsRes]) => {
         if (cancelled) return;
         setPost(postRes.data);
@@ -123,27 +166,25 @@ export default function PostDetail() {
       .catch((err) => { if (!cancelled) console.error(err); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, token]);
 
-  // Scroll to newly created comment
   useEffect(() => {
     if (newCommentId && newCommentRef.current) {
       newCommentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [newCommentId]);
 
-  // Clear highlight after 3s
   useEffect(() => {
     if (!newCommentId) return;
     const t = setTimeout(() => setNewCommentId(null), 3000);
     return () => clearTimeout(t);
   }, [newCommentId]);
 
-  // Count root + replies
   const countAll = (nodes = []) =>
     nodes.reduce((sum, n) => sum + 1 + countAll(n.replies), 0);
 
-  /* ---------------- add root comment (optimistic) ---------------- */
+  const needAuth = () => nav("/signin", { state: { from: `/post/${id}` } });
+
   const handleAddComment = async (e) => {
     e.preventDefault();
     const text = newComment.trim();
@@ -170,9 +211,7 @@ export default function PostDetail() {
 
     try {
       const res = await postApi.addComment(id, text, null, token);
-      setComments((prev) =>
-        prev.map((c) => (c.id === tempId ? res.data : c))
-      );
+      setComments((prev) => prev.map((c) => (c.id === tempId ? res.data : c)));
       setNewCommentId(res.data.id);
     } catch (err) {
       setComments((prev) => prev.filter((c) => c.id !== tempId));
@@ -182,7 +221,6 @@ export default function PostDetail() {
     }
   };
 
-  /* ---------------- add reply (non-optimistic, simpler) ---------------- */
   const submitReply = async (content, parentId, onSuccess) => {
     setSubmitting(true);
     try {
@@ -241,6 +279,19 @@ export default function PostDetail() {
             <div className="prose">{post.content}</div>
           </div>
         </article>
+
+        {/* ---------- REACTION BAR ---------- */}
+        <div className="post-reactions-bar">
+          <ReactButton
+            post={post}
+            account={account}
+            token={token}
+            onNeedAuth={needAuth}
+          />
+          <span className="post-reactions-hint">
+            {post.likedByMe ? "You loved this" : "Love this post"}
+          </span>
+        </div>
 
         {account ? (
           <div className="card wide comment-form-card">
