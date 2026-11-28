@@ -3,10 +3,6 @@ import { Link } from "react-router-dom";
 import { postApi } from "../api/posts.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
-/* =========================================================================
- * Helpers
- * ========================================================================= */
-
 const readingTime = (content = "") => {
   const words = content.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
@@ -30,10 +26,6 @@ const avatarUrl = (user) =>
     user?.username || "user"
   )}&background=af6a51&color=fff`;
 
-/* =========================================================================
- * Feed
- * ========================================================================= */
-
 export default function Feed() {
   const { account, stats } = useAuth();
 
@@ -54,7 +46,6 @@ export default function Feed() {
 
   return (
     <>
-      {/* ============================== TOPBAR ============================== */}
       <header className="topbar">
         <Link to="/" className="brand">anyBlog</Link>
         <div className="topbar-right">
@@ -67,7 +58,6 @@ export default function Feed() {
       </header>
 
       <div className="feed-layout">
-        {/* ============================ SIDEBAR ============================ */}
         <aside className="feed-sidebar">
           {account ? (
             <div className="side-profile">
@@ -82,7 +72,6 @@ export default function Feed() {
                 📊 Dashboard
               </Link>
 
-              {/* Real stats from AuthContext */}
               <div className="side-stats">
                 <div className="side-stat">
                   <span className="side-stat-num">{stats.totalPosts}</span>
@@ -117,7 +106,6 @@ export default function Feed() {
           </nav>
         </aside>
 
-        {/* ============================== MAIN ============================== */}
         <main className="feed-main">
           <div className="page-head">
             <h1>Latest Stories</h1>
@@ -141,9 +129,6 @@ export default function Feed() {
           <div className="feed-list">
             {posts.map((post) => (
               <article key={post.id} className="feed-card">
-                {/* ---- Vote column ----
-                    Placeholder until backend exposes post.voteCount.
-                    Wire onClick → POST /posts/:id/vote when ready. */}
                 <div className="vote-col">
                   <button className="vote-btn" aria-label="Upvote" title="Voting coming soon">▲</button>
                   <span className="vote-count">{post.voteCount ?? 0}</span>
@@ -151,7 +136,6 @@ export default function Feed() {
                 </div>
 
                 <div className="feed-card-body">
-                  {/* Meta row — all real data */}
                   <div className="feed-card-meta">
                     <img
                       src={avatarUrl(post.author)}
@@ -167,12 +151,10 @@ export default function Feed() {
                     <span className="feed-read">{readingTime(post.content)} min read</span>
                   </div>
 
-                  {/* Title */}
                   <h2 className="feed-card-title">
                     <Link to={`/post/${post.id}`}>{post.title}</Link>
                   </h2>
 
-                  {/* Image — only if media exists */}
                   {post.media?.[0]?.url && (
                     <Link to={`/post/${post.id}`} className="feed-thumb-link">
                       <img
@@ -184,10 +166,8 @@ export default function Feed() {
                     </Link>
                   )}
 
-                  {/* Excerpt */}
                   <p className="feed-card-excerpt">{excerpt(post.content)}</p>
 
-                  {/* Tags — only render if backend sends them */}
                   {Array.isArray(post.tags) && post.tags.length > 0 && (
                     <div className="feed-card-tags">
                       {post.tags.map((tag) => (
@@ -196,14 +176,13 @@ export default function Feed() {
                     </div>
                   )}
 
-                  {/* Engagement row */}
                   <div className="feed-actions">
                     <button className="action-btn" title="Likes coming soon">❤️ {post.likeCount ?? 0}</button>
                     <Link
                       to={`/post/${post.id}#comments`}
                       className="action-btn"
                     >
-                      💬 {post.commentCount ?? 0}
+                      💬 {post.commentCount != null ? post.commentCount : "Comments"}
                     </Link>
                     <button className="action-btn">🔖 Save</button>
                     <Link to={`/post/${post.id}`} className="action-btn action-read-more">
