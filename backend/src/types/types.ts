@@ -23,6 +23,16 @@ export type ForgotPasswordOtpInput = {
     newPassword? : string;
 };
 
+export type UpdateProfileInput = {
+    displayName?: string;
+    bio?: string;
+    avatarUrl?: string;
+    websiteUrl?: string;
+    twitterUrl?: string;
+    githubUrl?: string;
+    linkedinUrl?: string;
+};
+
 export type CreatePostInput = {
     title    : string;
     content  : string;

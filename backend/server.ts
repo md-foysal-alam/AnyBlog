@@ -9,6 +9,7 @@ import "dotenv/config";
 import authRouter from "./src/routes/auth.routes.ts";
 import postRouter from "./src/routes/post.routes.ts";
 import uploadRouter from "./src/routes/upload.routes.ts";
+import profileRouter from "./src/routes/profile.routes.ts"
 
 import { connectDb } from "./src/db/db.ts";
 import { errorHandler } from "./src/middlewares/errorHandler.ts";
@@ -28,7 +29,8 @@ app.get("/health", (_req, res) => res.status(200).json({ status: "ok" }));
 // 🟢 MOUNT ROUTES
 app.use("/anyblog", authRouter);                  // Auth routes (/signup, /signin, etc)
 app.use("/anyblog/posts", postRouter);            // Post & Comment routes
-app.use("/anyblog/upload", uploadRouter);         // Cloudinary Upload route
+app.use("/anyblog/upload", uploadRouter);  
+app.use("/anyblog/profile", profileRouter);       // Cloudinary Upload route
 
 app.use((_req, res) => res.status(404).json({ success: false, message: "Route not found" }));
 app.use(errorHandler);

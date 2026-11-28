@@ -44,6 +44,11 @@ export const accounts = pgTable("accounts", {
   displayName:   text("display_name"),
   avatarUrl:     text("avatar_url"),
   bio:           text("bio"),
+  websiteUrl:    text("website_url"),
+  twitterUrl:    text("twitter_url"),
+  githubUrl:     text("github_url"),
+  linkedinUrl:   text("linkedin_url"),
+  
   emailVerified: boolean("email_verified").default(false).notNull(),
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   updatedAt:     timestamp("updated_at").defaultNow().notNull(),
