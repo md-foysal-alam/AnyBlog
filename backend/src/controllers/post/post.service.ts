@@ -15,7 +15,7 @@
 import { eq, desc, sql } from "drizzle-orm";
 import appError from "../../utils/appError.ts";
 import { db } from "../../db/db.ts";
-import { posts, media, comments } from "../../models/schema.ts";
+import { posts, media } from "../../models/schema.ts";
 import type { CreatePostInput } from "../../types/types.ts";
 
 class PostService {
@@ -60,10 +60,14 @@ class PostService {
                 media: true
             },
             extras: {
-                // Correlated subquery — one index hit per row on comments_post_idx
-                commentCount: sql<number>`
-                    (select count(*)::int from ${comments} where ${comments.postId} = ${posts.id})
-                `.as("comment_count"),
+                // Raw SQL — do NOT use ${comments.postId} here.
+                // Inside `extras`, Drizzle resolves column refs against the
+                // outer table (posts), which produces "posts"."post_id".
+                commentCount: sql<number>`(
+                    select count(*)::int
+                    from "comments"
+                    where "comments"."post_id" = "posts"."id"
+                )`.as("comment_count"),
             }
         });
         return feed;
@@ -79,9 +83,11 @@ class PostService {
                 media: true
             },
             extras: {
-                commentCount: sql<number>`
-                    (select count(*)::int from ${comments} where ${comments.postId} = ${posts.id})
-                `.as("comment_count"),
+                commentCount: sql<number>`(
+                    select count(*)::int
+                    from "comments"
+                    where "comments"."post_id" = "posts"."id"
+                )`.as("comment_count"),
             }
         });
 
